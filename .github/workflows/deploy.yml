@@ -1,0 +1,68 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Copy files to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          timeout: 60s
+          command_timeout: 10m
+          source: "dist,package.json,package-lock.json,.env.example"
+          target: "/var/www/findejob"
+          rm: false # Set to true if you want to wipe the folder before copying
+
+      - name: Restart Server on VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          script: |
+            # Ensure proper environment
+            export PATH=$PATH:/usr/local/bin:/usr/bin:/bin
+            [ -s "$HOME/.nvm/nvm.sh" ] && \. "$HOME/.nvm/nvm.sh"
+            
+            cd /var/www/findejob
+            
+            # Check if directory is empty (copy failed)
+            if [ ! -d "dist" ]; then
+              echo "Error: dist directory not found. Upload might have failed."
+              exit 1
+            fi
+
+            npm install --production
+            
+            # Restart with PM2
+            if pm2 list | grep -q "findejob"; then
+              pm2 restart findejob
+            else
+              pm2 start dist/server.cjs --name "findejob"
+            fi
+            pm2 save

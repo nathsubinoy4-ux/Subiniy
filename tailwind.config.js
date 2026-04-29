@@ -1,0 +1,47 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+    "./src/components/**/*.{js,ts,jsx,tsx}",
+    "./components/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+  safelist: [
+    'w-12',
+    'h-12',
+    'aspect-square',
+    'object-contain',
+    'grayscale',
+    'opacity-50',
+    'brightness-200',
+    'bg-zinc-900/50',
+    'border',
+    'border-white/5',
+    'rounded-3xl',
+    'p-6',
+    'flex',
+    'items-center',
+    'justify-center',
+    'backdrop-blur-sm',
+    'text-rgb-animated',
+    'text-shine-overlay',
+    'max-w-[80%]',
+    'max-h-[60%]',
+    'drop-shadow-xl',
+    'brightness-110',
+    'min-w-[80px]',
+    'w-[160px]',
+    'h-[190px]',
+    'rounded-[24px]',
+    'snap-start',
+    'tracking-[0.2em]',
+    'shadow-2xl',
+    'shadow-emerald-500/5',
+    'bg-emerald-500/10',
+    'border-emerald-500/20'
+  ]
+}

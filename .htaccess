@@ -1,0 +1,35 @@
+# LiteSpeed / Apache Configuration for React + Node.js
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  
+  # 1. Forward all /api requests to the Node.js process
+  # Change 3000 to your actual Node.js port if different.
+  # LiteSpeed requires the full URL for proxying sometimes.
+  RewriteRule ^api/(.*)$ http://127.0.0.1:3000/api/$1 [P,L]
+
+  # 2. If the request is for a real file or directory, serve it directly
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # 3. For any other request, serve index.html
+  # This enables SPA routing (React Router) to handle reloads on /profile, /admin, etc.
+  RewriteRule ^(.*)$ index.html [L]
+</IfModule>
+
+# Fallback 404 handler to ensure we always land on the app
+ErrorDocument 404 /index.html
+
+# Handle Case Sensitivity for API
+<IfModule mod_speling.c>
+  CheckCaseOnly On
+  CheckSpelling On
+</IfModule>
+
+# Security Headers
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set X-XSS-Protection "1; mode=block"
+</IfModule>
